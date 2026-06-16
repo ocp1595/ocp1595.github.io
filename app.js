@@ -2,8 +2,10 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/fireba
 import {
   GoogleAuthProvider,
   getAuth,
+  getRedirectResult,
   onAuthStateChanged,
   signInWithPopup,
+  signInWithRedirect,
   signOut,
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import {
@@ -56,6 +58,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
+provider.setCustomParameters({ prompt: "select_account" });
 
 const state = {
   user: null,
@@ -83,10 +86,20 @@ authButton.addEventListener("click", async () => {
       await signOut(auth);
       return;
     }
+
+    if (shouldUseRedirectSignIn()) {
+      await signInWithRedirect(auth, provider);
+      return;
+    }
+
     await signInWithPopup(auth, provider);
   } catch (error) {
-    setSaveStatus(`登入失敗：${error.message}`);
+    setSaveStatus(getAuthErrorMessage(error));
   }
+});
+
+getRedirectResult(auth).catch((error) => {
+  setSaveStatus(getAuthErrorMessage(error));
 });
 
 loadQuizButton.addEventListener("click", () => {
@@ -110,6 +123,7 @@ loadQuiz(state.quizId);
 
 async function loadQuiz(quizId) {
   resetResult();
+
   try {
     const questionsRef = collection(db, "quizzes", quizId, "questions");
     const snapshot = await withTimeout(getDocs(questionsRef), 6000);
@@ -223,11 +237,7 @@ async function loadRecords() {
   }
 
   try {
-    const recordsQuery = query(
-      collection(db, "attempts"),
-      where("uid", "==", state.user.uid),
-      limit(8),
-    );
+    const recordsQuery = query(collection(db, "attempts"), where("uid", "==", state.user.uid), limit(8));
     const snapshot = await getDocs(recordsQuery);
     const records = snapshot.docs
       .map((doc) => doc.data())
@@ -278,6 +288,18 @@ function withTimeout(promise, timeoutMs) {
       window.setTimeout(() => reject(new Error("Firestore 讀取逾時")), timeoutMs);
     }),
   ]);
+}
+
+function shouldUseRedirectSignIn() {
+  return window.matchMedia("(max-width: 760px), (pointer: coarse)").matches;
+}
+
+function getAuthErrorMessage(error) {
+  const message = error?.message || String(error);
+  if (message.includes("disallowed_useragent")) {
+    return "Google 不允許在 LINE、Facebook、Gmail 等內嵌瀏覽器登入。請用 Chrome、Edge 或 Safari 直接開啟 https://ocp1595.github.io/ 再登入。";
+  }
+  return `登入失敗：${message}`;
 }
 
 function escapeHtml(value) {
