@@ -3,92 +3,103 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Oracle ERP Engineer | Forms / Reports / Database</title>
+    <title>線上練習測驗 | GitHub Pages + Firebase</title>
     <meta
       name="description"
-      content="Oracle Database 工程師，專注 Oracle Forms、Reports 與企業 ERP 系統建置。"
+      content="使用 GitHub Pages、Firebase Auth 與 Firestore 建立的線上練習測驗網站。"
     />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <header class="site-header">
       <a class="brand" href="#top" aria-label="回到首頁">
-        <span class="brand-mark">DB</span>
-        <span>Oracle ERP Engineer</span>
+        <span class="brand-mark">Q</span>
+        <span>線上練習測驗</span>
       </a>
       <nav class="nav" aria-label="主要導覽">
-        <a href="#services">服務</a>
-        <a href="#stack">技術</a>
-        <a href="#contact">聯絡</a>
+        <a href="#quiz">測驗</a>
+        <a href="#records">紀錄</a>
+        <button class="nav-button" id="authButton" type="button">Google 登入</button>
       </nav>
     </header>
 
     <main id="top">
       <section class="hero">
         <div class="hero-copy">
-          <h1>建構穩定、可維護的 Oracle ERP 系統</h1>
+          <p class="status-pill" id="authStatus">尚未登入</p>
+          <h1>高中國文線上練習測驗</h1>
           <p>
-            我是一位 Oracle 資料庫工程師，使用 Oracle FMW Forms / Reports Builder
-            建構公司 ERP 系統，專注資料流程、表單作業、報表輸出與企業營運需求整合。
+            使用 Firebase Google 登入與 Firestore 題庫，完成測驗後會即時計分，
+            並將作答紀錄儲存到雲端，方便日後追蹤練習成果。
           </p>
           <div class="hero-actions">
-            <a class="button button-primary" href="#contact">開始聯絡</a>
-            <a class="button button-secondary" href="#services">查看服務</a>
+            <a class="button button-primary" href="#quiz">開始測驗</a>
+            <a class="button button-secondary" href="#records">查看紀錄</a>
           </div>
         </div>
-        <figure class="hero-media" aria-label="ERP 工程工作情境示意圖">
-          <img src="assets/oracle-erp-hero.png" alt="Oracle ERP 工程工作情境" />
+        <figure class="hero-media" aria-label="線上測驗工作情境示意圖">
+          <img src="assets/oracle-erp-hero.png" alt="線上測驗與資料庫工作情境" />
         </figure>
       </section>
 
-      <section class="section" id="services">
-        <div class="section-heading">
-          <h2>服務範圍</h2>
-          <p>從資料庫設計到 Forms/Reports 程式交付，協助企業流程穩定落地。</p>
-        </div>
-        <div class="service-grid">
-          <article class="service-card">
-            <h3>ERP 表單開發</h3>
-            <p>規劃主檔、交易檔、查詢與核准流程，建立一致且可維護的 Forms 操作介面。</p>
-          </article>
-          <article class="service-card">
-            <h3>報表與列印</h3>
-            <p>使用 Reports Builder 製作管理報表、對帳明細、憑證與作業輸出格式。</p>
-          </article>
-          <article class="service-card">
-            <h3>Oracle 資料庫設計</h3>
-            <p>設計資料表、索引、PL/SQL 程式與批次作業，兼顧效能、正確性與稽核需求。</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="section split" id="stack">
-        <div>
-          <h2>技術焦點</h2>
-          <p>
-            以 Oracle 生態系為核心，處理 ERP 常見的資料一致性、權限控管、交易流程與報表需求。
+      <section class="app-shell" id="quiz">
+        <aside class="quiz-panel">
+          <h2>測驗設定</h2>
+          <label class="field-label" for="quizSelect">選擇測驗</label>
+          <select id="quizSelect" class="select-control">
+            <option value="oracle-basic">高中國文基礎練習</option>
+          </select>
+          <button class="button button-primary full-width" id="loadQuizButton" type="button">
+            載入題目
+          </button>
+          <div class="panel-note">
+            <strong>Firestore 路徑</strong>
+            <span>quizzes / oracle-basic / questions</span>
+          </div>
+          <p class="helper-text">
+            如果 Firestore 尚未建立題目，頁面會先使用內建範例題，讓你可以測試流程。
           </p>
-        </div>
-        <ul class="stack-list">
-          <li>Oracle Database / SQL / PL/SQL</li>
-          <li>Oracle Forms Builder / Reports Builder</li>
-          <li>Oracle Fusion Middleware</li>
-          <li>ERP 主檔、交易檔、批次與稽核流程</li>
-        </ul>
+        </aside>
+
+        <section class="quiz-workspace" aria-live="polite">
+          <div class="workspace-header">
+            <div>
+              <h2 id="quizTitle">等待載入測驗</h2>
+              <p id="quizDescription">請登入後載入題目，或直接使用範例題練習。</p>
+            </div>
+            <span class="question-count" id="questionCount">0 題</span>
+          </div>
+
+          <form id="quizForm" class="question-list"></form>
+
+          <div class="result-bar">
+            <div>
+              <strong id="scoreText">尚未送出</strong>
+              <span id="saveStatus">登入後可儲存作答紀錄</span>
+            </div>
+            <button class="button button-primary" id="submitQuizButton" type="button" disabled>
+              送出答案
+            </button>
+          </div>
+        </section>
       </section>
 
-      <section class="contact" id="contact">
-        <div>
-          <h2>需要整理或展示你的 ERP 專案？</h2>
-          <p>這個 GitHub Pages 網站可以作為個人履歷、技術作品集或專案入口頁。</p>
+      <section class="records-section" id="records">
+        <div class="section-heading">
+          <h2>我的作答紀錄</h2>
+          <p>登入後會顯示最近的練習結果。一般練習測驗採前端計分，適合自我練習。</p>
         </div>
-        <a class="button button-primary" href="mailto:your-email@example.com">寄送 Email</a>
+        <div class="records-list" id="recordsList">
+          <p class="empty-state">尚無作答紀錄。</p>
+        </div>
       </section>
     </main>
 
     <footer class="site-footer">
-      <span>© 2026 Oracle ERP Engineer</span>
-      <span>Built for GitHub Pages</span>
+      <span>Built with GitHub Pages + Firebase</span>
+      <span>Practice Quiz</span>
     </footer>
+
+    <script type="module" src="app.js"></script>
   </body>
 </html>

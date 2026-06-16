@@ -1,30 +1,86 @@
-# GitHub Pages Website
+# GitHub Pages + Firebase 線上練習測驗
 
-這是一個可直接部署到 GitHub Pages 的靜態網站。
+這是一個部署在 GitHub Pages 的靜態練習測驗網站，使用 Firebase Auth 登入，並使用 Firestore 儲存題目與作答紀錄。
 
-## 本機檔案
+## 檔案
 
-- `index.html`: 首頁內容
-- `style.css`: 頁面樣式
-- `assets/oracle-erp-hero.png`: 首頁視覺圖片
+- `index.html`: 網站畫面
+- `style.css`: 響應式版面樣式
+- `app.js`: Firebase Auth、Firestore 讀題、前端計分與紀錄寫入
+- `firestore-rules.txt`: 建議貼到 Firebase Firestore Rules 的規則
+- `assets/oracle-erp-hero.png`: 首頁主視覺圖片
 
-## 部署到 GitHub Pages
+## Firebase 設定
 
-1. 在 GitHub 建立一個 repository。
-2. 將這個資料夾初始化為 Git repo。
-3. Commit 並 push 到 GitHub。
-4. 到 GitHub repository 的 `Settings > Pages`。
-5. Source 選 `Deploy from a branch`。
-6. Branch 選 `main`，資料夾選 `/root`，按 `Save`。
+### Authentication
 
-如果 repository 名稱是 `<你的帳號>.github.io`，網站網址會是：
+1. 到 Firebase Console。
+2. 開啟 `Build > Authentication`。
+3. 啟用 `Google` 登入。
+4. 在 Authorized domains 確認有：
 
 ```text
-https://<你的帳號>.github.io/
+ocp1595.github.io
 ```
 
-如果是一般 repository，例如 `portfolio`，網站網址通常會是：
+### Firestore 題庫
+
+建立 collection：
 
 ```text
-https://<你的帳號>.github.io/portfolio/
+quizzes
+```
+
+建立 document：
+
+```text
+oracle-basic
+```
+
+在 `oracle-basic` 底下建立 subcollection：
+
+```text
+questions
+```
+
+每一題 document 欄位格式：
+
+```text
+text          string
+options       array
+answerIndex   number
+explanation   string
+```
+
+範例：
+
+```text
+text: 下列哪一項最接近「修辭」的意思？
+options: 整理資料表, 美化與調整語言表達, 設定網路連線, 建立程式索引
+answerIndex: 1
+explanation: 修辭是調整語言表達，使文字更精確、生動或有感染力。
+```
+
+### Firestore Rules
+
+把 `firestore-rules.txt` 的內容貼到：
+
+```text
+Firestore Database > Rules
+```
+
+然後按 Publish。
+
+## 部署
+
+```powershell
+git add .
+git commit -m "Add Firebase quiz app"
+git push
+```
+
+GitHub Pages 網址：
+
+```text
+https://ocp1595.github.io/
 ```
