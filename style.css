@@ -321,6 +321,41 @@ a {
   display: none;
 }
 
+.auth-page {
+  display: grid;
+  min-height: calc(100vh - 73px);
+  place-items: center;
+  padding: clamp(36px, 8vw, 80px) clamp(20px, 5vw, 72px);
+}
+
+.auth-page-card {
+  width: min(100%, 520px);
+  padding: 30px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.auth-page-card .auth-card {
+  margin: 0;
+  padding: 0;
+  border-bottom: 0;
+}
+
+.auth-page-card h1 {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(32px, 5vw, 44px);
+  line-height: 1.12;
+}
+
+.auth-page-copy {
+  margin: 12px 0 0;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
 .quiz-panel .button {
   margin-top: 14px;
 }

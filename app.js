@@ -69,16 +69,12 @@ const state = {
 const authButton = document.querySelector("#authButton");
 const authStatus = document.querySelector("#authStatus");
 const authCard = document.querySelector("#authCard");
-const authTitle = document.querySelector("#authTitle");
 const authMessage = document.querySelector("#authMessage");
 const emailInput = document.querySelector("#emailInput");
 const passwordInput = document.querySelector("#passwordInput");
-const confirmPasswordGroup = document.querySelector("#confirmPasswordGroup");
 const confirmPasswordInput = document.querySelector("#confirmPasswordInput");
 const loginEmailButton = document.querySelector("#loginEmailButton");
 const registerEmailButton = document.querySelector("#registerEmailButton");
-const showRegisterButton = document.querySelector("#showRegisterButton");
-const showLoginButton = document.querySelector("#showLoginButton");
 const resetPasswordButton = document.querySelector("#resetPasswordButton");
 const quizSelect = document.querySelector("#quizSelect");
 const loadQuizButton = document.querySelector("#loadQuizButton");
@@ -91,65 +87,55 @@ const scoreText = document.querySelector("#scoreText");
 const saveStatus = document.querySelector("#saveStatus");
 const recordsList = document.querySelector("#recordsList");
 
-authButton.addEventListener("click", async () => {
+authButton?.addEventListener("click", async () => {
   if (state.user) {
     await signOut(auth);
     return;
   }
-  authCard.scrollIntoView({ behavior: "smooth", block: "center" });
-  emailInput.focus();
+  authCard?.scrollIntoView({ behavior: "smooth", block: "center" });
+  emailInput?.focus();
 });
 
-authCard.addEventListener("submit", (event) => {
+authCard?.addEventListener("submit", (event) => {
   event.preventDefault();
-  if (isRegisterMode()) {
+  if (isRegisterPage()) {
     registerWithEmail();
     return;
   }
   signInWithEmail();
 });
 
-loginEmailButton.addEventListener("click", () => {
-  signInWithEmail();
-});
-
-registerEmailButton.addEventListener("click", () => {
-  registerWithEmail();
-});
-
-showRegisterButton.addEventListener("click", () => {
-  setAuthMode("register");
-});
-
-showLoginButton.addEventListener("click", () => {
-  setAuthMode("login");
-});
-
-resetPasswordButton.addEventListener("click", () => {
+resetPasswordButton?.addEventListener("click", () => {
   resetPassword();
 });
 
-loadQuizButton.addEventListener("click", () => {
+loadQuizButton?.addEventListener("click", () => {
   state.quizId = quizSelect.value;
   loadQuiz(state.quizId);
 });
 
-submitQuizButton.addEventListener("click", () => {
+submitQuizButton?.addEventListener("click", () => {
   submitQuiz();
 });
 
 onAuthStateChanged(auth, (user) => {
   state.user = user;
-  authButton.textContent = user ? "登出" : "帳號登入";
-  authStatus.textContent = user ? `已登入：${user.email}` : "尚未登入";
-  setSaveStatus(user ? "送出後會儲存作答紀錄" : "登入後可儲存作答紀錄");
-  loadRecords();
+  if (authButton) authButton.textContent = user ? "登出" : "帳號登入";
+  if (authStatus) authStatus.textContent = user ? `已登入：${user.email}` : "尚未登入";
+
+  if (!isRegisterPage()) {
+    setSaveStatus(user ? "送出後會儲存作答紀錄" : "登入後可儲存作答紀錄");
+    loadRecords();
+  } else if (user) {
+    setAuthFeedback("目前已登入。可以返回登入頁開始測驗。", "success");
+  }
 });
 
-loadQuiz(state.quizId);
+if (quizForm) {
+  loadQuiz(state.quizId);
+}
 
 async function signInWithEmail() {
-  setAuthMode("login", { keepValues: true, quiet: true });
   const { email, password } = getEmailCredentials();
   if (!email || !password) return;
 
@@ -166,20 +152,14 @@ async function signInWithEmail() {
 }
 
 async function registerWithEmail() {
-  if (!isRegisterMode()) {
-    setAuthMode("register", { keepValues: true });
-    return;
-  }
-
   const { email, password } = getEmailCredentials();
   if (!email || !password) return;
 
-  const confirmPassword = confirmPasswordInput.value;
+  const confirmPassword = confirmPasswordInput?.value || "";
   if (password !== confirmPassword) {
     setAuthFeedback("註冊錯誤：兩次輸入的密碼不一致，請重新確認。", "error");
     clearAuthInputs();
-    confirmPasswordGroup.hidden = false;
-    passwordInput.focus();
+    passwordInput?.focus();
     return;
   }
 
@@ -187,7 +167,7 @@ async function registerWithEmail() {
     setAuthFeedback("註冊中，請稍候...", "success");
     await setPersistence(auth, browserLocalPersistence);
     await createUserWithEmailAndPassword(auth, email, password);
-    setAuthFeedback("註冊成功，已自動登入並清除輸入資料。", "success");
+    setAuthFeedback("註冊成功，已自動登入並清除輸入資料。請返回登入頁開始測驗。", "success");
   } catch (error) {
     setAuthFeedback(`註冊錯誤：${getEmailAuthErrorMessage(error)}`, "error");
   } finally {
@@ -212,18 +192,18 @@ async function resetPassword() {
 }
 
 function getEmailCredentials() {
-  const email = emailInput.value.trim();
-  const password = passwordInput.value;
+  const email = emailInput?.value.trim() || "";
+  const password = passwordInput?.value || "";
 
   if (!email) {
     setAuthFeedback("請輸入 Email。", "error");
-    emailInput.focus();
+    emailInput?.focus();
     return { email: "", password: "" };
   }
 
   if (password.length < 6) {
     setAuthFeedback("密碼至少需要 6 個字元。", "error");
-    passwordInput.focus();
+    passwordInput?.focus();
     return { email: "", password: "" };
   }
 
@@ -339,6 +319,8 @@ async function submitQuiz() {
 }
 
 async function loadRecords() {
+  if (!recordsList) return;
+
   if (!state.user) {
     recordsList.innerHTML = `<p class="empty-state">請先登入以查看作答紀錄。</p>`;
     return;
@@ -386,7 +368,7 @@ function resetResult() {
 }
 
 function setSaveStatus(message) {
-  saveStatus.textContent = message;
+  if (saveStatus) saveStatus.textContent = message;
   if (authMessage) {
     authMessage.textContent = message;
     authMessage.classList.remove("success", "error");
@@ -394,7 +376,7 @@ function setSaveStatus(message) {
 }
 
 function setAuthFeedback(message, type) {
-  saveStatus.textContent = message;
+  if (saveStatus) saveStatus.textContent = message;
   if (!authMessage) return;
   authMessage.textContent = message;
   authMessage.classList.remove("success", "error");
@@ -402,34 +384,13 @@ function setAuthFeedback(message, type) {
 }
 
 function clearAuthInputs() {
-  emailInput.value = "";
-  passwordInput.value = "";
-  confirmPasswordInput.value = "";
+  if (emailInput) emailInput.value = "";
+  if (passwordInput) passwordInput.value = "";
+  if (confirmPasswordInput) confirmPasswordInput.value = "";
 }
 
-function isRegisterMode() {
-  return authCard.dataset.mode === "register";
-}
-
-function setAuthMode(mode, options = {}) {
-  const registerMode = mode === "register";
-  authCard.dataset.mode = registerMode ? "register" : "login";
-  authTitle.textContent = registerMode ? "註冊新帳號" : "帳號登入";
-  confirmPasswordGroup.hidden = !registerMode;
-  loginEmailButton.hidden = registerMode;
-  registerEmailButton.hidden = !registerMode;
-  showRegisterButton.hidden = registerMode;
-  showLoginButton.hidden = !registerMode;
-  resetPasswordButton.hidden = registerMode;
-
-  if (!options.keepValues) clearAuthInputs();
-  if (registerMode) {
-    confirmPasswordInput.value = "";
-  }
-
-  if (!options.quiet) {
-    setAuthFeedback(registerMode ? "請輸入 Email、密碼與確認密碼後註冊。" : "請輸入 Email 與密碼後登入。", "");
-  }
+function isRegisterPage() {
+  return authCard?.dataset.mode === "register";
 }
 
 function withTimeout(promise, timeoutMs) {
@@ -443,7 +404,7 @@ function withTimeout(promise, timeoutMs) {
 
 function getEmailAuthErrorMessage(error) {
   const code = error?.code || "";
-  if (code === "auth/email-already-in-use") return "這個 Email 已註冊，請直接登入。";
+  if (code === "auth/email-already-in-use") return "這個 Email 已註冊，請返回登入頁登入。";
   if (code === "auth/invalid-email") return "Email 格式不正確。";
   if (code === "auth/invalid-credential") return "Email 或密碼錯誤。";
   if (code === "auth/operation-not-allowed") return "Firebase 尚未啟用 Email/Password 登入，請到 Authentication > Sign-in method 啟用。";

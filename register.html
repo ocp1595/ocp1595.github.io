@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>註冊新帳號 | 線上練習測驗</title>
+    <meta name="description" content="註冊線上練習測驗帳號。" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html" aria-label="回到登入頁">
+        <span class="brand-mark">Q</span>
+        <span>線上練習測驗</span>
+      </a>
+      <nav class="nav" aria-label="主要導覽">
+        <a href="index.html">返回登入</a>
+      </nav>
+    </header>
+
+    <main class="auth-page">
+      <section class="auth-page-card">
+        <form class="auth-card" id="authCard" data-mode="register">
+          <h1 id="authTitle">註冊新帳號</h1>
+          <p class="auth-page-copy">請設定這個測驗網站專用的登入密碼，不要使用 Google 帳號原本的密碼。</p>
+
+          <label class="field-label" for="emailInput">Email</label>
+          <input class="text-control" id="emailInput" type="email" autocomplete="email" placeholder="you@example.com" />
+
+          <label class="field-label" for="passwordInput">密碼</label>
+          <input
+            class="text-control"
+            id="passwordInput"
+            type="password"
+            autocomplete="new-password"
+            placeholder="至少 6 個字元"
+          />
+
+          <div class="confirm-password-group" id="confirmPasswordGroup">
+            <label class="field-label" for="confirmPasswordInput">確認密碼</label>
+            <input
+              class="text-control"
+              id="confirmPasswordInput"
+              type="password"
+              autocomplete="new-password"
+              placeholder="再輸入一次密碼"
+            />
+          </div>
+
+          <div class="auth-actions">
+            <button class="button button-primary" id="registerEmailButton" type="submit">註冊</button>
+            <a class="button button-secondary" href="index.html">返回登入</a>
+          </div>
+          <p class="auth-message" id="authMessage">請輸入 Email、密碼與確認密碼後註冊。</p>
+        </form>
+      </section>
+    </main>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

@@ -56,26 +56,12 @@
               autocomplete="current-password"
               placeholder="至少 6 個字元"
             />
-            <div class="confirm-password-group" id="confirmPasswordGroup" hidden>
-              <label class="field-label" for="confirmPasswordInput">確認密碼</label>
-              <input
-                class="text-control"
-                id="confirmPasswordInput"
-                type="password"
-                autocomplete="new-password"
-                placeholder="註冊時請再輸入一次密碼"
-              />
-            </div>
             <div class="auth-actions">
-              <button class="button button-primary" id="loginEmailButton" type="button">登入</button>
-              <button class="button button-secondary" id="registerEmailButton" type="button" hidden>註冊</button>
+              <button class="button button-primary" id="loginEmailButton" type="submit">登入</button>
+              <a class="button button-secondary" href="register.html">註冊新帳號</a>
             </div>
-            <div class="auth-switches">
-              <button class="link-button" id="showRegisterButton" type="button">建立新帳號</button>
-              <button class="link-button" id="showLoginButton" type="button" hidden>返回登入</button>
-              <button class="link-button" id="resetPasswordButton" type="button">寄送重設密碼信</button>
-            </div>
-            <p class="auth-message" id="authMessage">請輸入 Email 與密碼後登入，第一次使用請先註冊。</p>
+            <button class="link-button" id="resetPasswordButton" type="button">寄送重設密碼信</button>
+            <p class="auth-message" id="authMessage">請輸入 Email 與密碼後登入。第一次使用請前往註冊頁建立帳號。</p>
           </form>
 
           <h2>測驗設定</h2>
