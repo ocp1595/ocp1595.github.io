@@ -69,6 +69,7 @@ const state = {
 const authButton = document.querySelector("#authButton");
 const authStatus = document.querySelector("#authStatus");
 const authCard = document.querySelector("#authCard");
+const authTitle = document.querySelector("#authTitle");
 const authMessage = document.querySelector("#authMessage");
 const emailInput = document.querySelector("#emailInput");
 const passwordInput = document.querySelector("#passwordInput");
@@ -76,6 +77,8 @@ const confirmPasswordGroup = document.querySelector("#confirmPasswordGroup");
 const confirmPasswordInput = document.querySelector("#confirmPasswordInput");
 const loginEmailButton = document.querySelector("#loginEmailButton");
 const registerEmailButton = document.querySelector("#registerEmailButton");
+const showRegisterButton = document.querySelector("#showRegisterButton");
+const showLoginButton = document.querySelector("#showLoginButton");
 const resetPasswordButton = document.querySelector("#resetPasswordButton");
 const quizSelect = document.querySelector("#quizSelect");
 const loadQuizButton = document.querySelector("#loadQuizButton");
@@ -99,6 +102,10 @@ authButton.addEventListener("click", async () => {
 
 authCard.addEventListener("submit", (event) => {
   event.preventDefault();
+  if (isRegisterMode()) {
+    registerWithEmail();
+    return;
+  }
   signInWithEmail();
 });
 
@@ -108,6 +115,14 @@ loginEmailButton.addEventListener("click", () => {
 
 registerEmailButton.addEventListener("click", () => {
   registerWithEmail();
+});
+
+showRegisterButton.addEventListener("click", () => {
+  setAuthMode("register");
+});
+
+showLoginButton.addEventListener("click", () => {
+  setAuthMode("login");
 });
 
 resetPasswordButton.addEventListener("click", () => {
@@ -134,7 +149,7 @@ onAuthStateChanged(auth, (user) => {
 loadQuiz(state.quizId);
 
 async function signInWithEmail() {
-  hideConfirmPassword();
+  setAuthMode("login", { keepValues: true, quiet: true });
   const { email, password } = getEmailCredentials();
   if (!email || !password) return;
 
@@ -151,15 +166,13 @@ async function signInWithEmail() {
 }
 
 async function registerWithEmail() {
-  const { email, password } = getEmailCredentials();
-  if (!email || !password) return;
-
-  if (confirmPasswordGroup.hidden) {
-    confirmPasswordGroup.hidden = false;
-    setAuthFeedback("請再輸入一次密碼，然後再次按註冊。", "error");
-    confirmPasswordInput.focus();
+  if (!isRegisterMode()) {
+    setAuthMode("register", { keepValues: true });
     return;
   }
+
+  const { email, password } = getEmailCredentials();
+  if (!email || !password) return;
 
   const confirmPassword = confirmPasswordInput.value;
   if (password !== confirmPassword) {
@@ -394,9 +407,29 @@ function clearAuthInputs() {
   confirmPasswordInput.value = "";
 }
 
-function hideConfirmPassword() {
-  confirmPasswordGroup.hidden = true;
-  confirmPasswordInput.value = "";
+function isRegisterMode() {
+  return authCard.dataset.mode === "register";
+}
+
+function setAuthMode(mode, options = {}) {
+  const registerMode = mode === "register";
+  authCard.dataset.mode = registerMode ? "register" : "login";
+  authTitle.textContent = registerMode ? "註冊新帳號" : "帳號登入";
+  confirmPasswordGroup.hidden = !registerMode;
+  loginEmailButton.hidden = registerMode;
+  registerEmailButton.hidden = !registerMode;
+  showRegisterButton.hidden = registerMode;
+  showLoginButton.hidden = !registerMode;
+  resetPasswordButton.hidden = registerMode;
+
+  if (!options.keepValues) clearAuthInputs();
+  if (registerMode) {
+    confirmPasswordInput.value = "";
+  }
+
+  if (!options.quiet) {
+    setAuthFeedback(registerMode ? "請輸入 Email、密碼與確認密碼後註冊。" : "請輸入 Email 與密碼後登入。", "");
+  }
 }
 
 function withTimeout(promise, timeoutMs) {

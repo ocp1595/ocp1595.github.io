@@ -270,7 +270,7 @@ a {
 
 .auth-actions {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 10px;
   margin-top: 14px;
 }
@@ -281,13 +281,23 @@ a {
 }
 
 .link-button {
-  margin-top: 12px;
   padding: 0;
   border: 0;
   background: transparent;
   color: var(--teal-dark);
   cursor: pointer;
   font-weight: 800;
+}
+
+.auth-switches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.link-button[hidden] {
+  display: none;
 }
 
 .auth-message {
