@@ -72,6 +72,7 @@ const authCard = document.querySelector("#authCard");
 const authMessage = document.querySelector("#authMessage");
 const emailInput = document.querySelector("#emailInput");
 const passwordInput = document.querySelector("#passwordInput");
+const confirmPasswordGroup = document.querySelector("#confirmPasswordGroup");
 const confirmPasswordInput = document.querySelector("#confirmPasswordInput");
 const loginEmailButton = document.querySelector("#loginEmailButton");
 const registerEmailButton = document.querySelector("#registerEmailButton");
@@ -133,10 +134,12 @@ onAuthStateChanged(auth, (user) => {
 loadQuiz(state.quizId);
 
 async function signInWithEmail() {
+  hideConfirmPassword();
   const { email, password } = getEmailCredentials();
   if (!email || !password) return;
 
   try {
+    setAuthFeedback("登入中，請稍候...", "success");
     await setPersistence(auth, browserLocalPersistence);
     await signInWithEmailAndPassword(auth, email, password);
     setAuthFeedback("登入成功，已清除輸入資料。", "success");
@@ -151,15 +154,24 @@ async function registerWithEmail() {
   const { email, password } = getEmailCredentials();
   if (!email || !password) return;
 
+  if (confirmPasswordGroup.hidden) {
+    confirmPasswordGroup.hidden = false;
+    setAuthFeedback("請再輸入一次密碼，然後再次按註冊。", "error");
+    confirmPasswordInput.focus();
+    return;
+  }
+
   const confirmPassword = confirmPasswordInput.value;
   if (password !== confirmPassword) {
     setAuthFeedback("註冊錯誤：兩次輸入的密碼不一致，請重新確認。", "error");
     clearAuthInputs();
+    confirmPasswordGroup.hidden = false;
     passwordInput.focus();
     return;
   }
 
   try {
+    setAuthFeedback("註冊中，請稍候...", "success");
     await setPersistence(auth, browserLocalPersistence);
     await createUserWithEmailAndPassword(auth, email, password);
     setAuthFeedback("註冊成功，已自動登入並清除輸入資料。", "success");
@@ -379,6 +391,11 @@ function setAuthFeedback(message, type) {
 function clearAuthInputs() {
   emailInput.value = "";
   passwordInput.value = "";
+  confirmPasswordInput.value = "";
+}
+
+function hideConfirmPassword() {
+  confirmPasswordGroup.hidden = true;
   confirmPasswordInput.value = "";
 }
 
