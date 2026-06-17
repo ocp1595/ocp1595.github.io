@@ -297,6 +297,16 @@ a {
   line-height: 1.6;
 }
 
+.auth-message.success {
+  color: var(--green);
+  font-weight: 800;
+}
+
+.auth-message.error {
+  color: var(--red);
+  font-weight: 800;
+}
+
 .quiz-panel .button {
   margin-top: 14px;
 }

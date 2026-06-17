@@ -139,9 +139,11 @@ async function signInWithEmail() {
   try {
     await setPersistence(auth, browserLocalPersistence);
     await signInWithEmailAndPassword(auth, email, password);
-    setSaveStatus("登入成功。");
+    setAuthFeedback("登入成功，已清除輸入資料。", "success");
   } catch (error) {
-    setSaveStatus(getEmailAuthErrorMessage(error));
+    setAuthFeedback(`登入錯誤：${getEmailAuthErrorMessage(error)}`, "error");
+  } finally {
+    clearAuthInputs();
   }
 }
 
@@ -151,32 +153,36 @@ async function registerWithEmail() {
 
   const confirmPassword = confirmPasswordInput.value;
   if (password !== confirmPassword) {
-    setSaveStatus("兩次輸入的密碼不一致，請重新確認。");
-    confirmPasswordInput.focus();
+    setAuthFeedback("註冊錯誤：兩次輸入的密碼不一致，請重新確認。", "error");
+    clearAuthInputs();
+    passwordInput.focus();
     return;
   }
 
   try {
     await setPersistence(auth, browserLocalPersistence);
     await createUserWithEmailAndPassword(auth, email, password);
-    setSaveStatus("註冊成功，已登入。");
+    setAuthFeedback("註冊成功，已自動登入並清除輸入資料。", "success");
   } catch (error) {
-    setSaveStatus(getEmailAuthErrorMessage(error));
+    setAuthFeedback(`註冊錯誤：${getEmailAuthErrorMessage(error)}`, "error");
+  } finally {
+    clearAuthInputs();
   }
 }
 
 async function resetPassword() {
   const email = emailInput.value.trim();
   if (!email) {
-    setSaveStatus("請先輸入 Email，再寄送重設密碼信。");
+    setAuthFeedback("寄送錯誤：請先輸入 Email，再寄送重設密碼信。", "error");
     return;
   }
 
   try {
     await sendPasswordResetEmail(auth, email);
-    setSaveStatus("重設密碼信已寄出，請檢查信箱。");
+    setAuthFeedback("重設密碼信已寄出，請檢查信箱。", "success");
+    clearAuthInputs();
   } catch (error) {
-    setSaveStatus(getEmailAuthErrorMessage(error));
+    setAuthFeedback(`寄送錯誤：${getEmailAuthErrorMessage(error)}`, "error");
   }
 }
 
@@ -185,13 +191,13 @@ function getEmailCredentials() {
   const password = passwordInput.value;
 
   if (!email) {
-    setSaveStatus("請輸入 Email。");
+    setAuthFeedback("請輸入 Email。", "error");
     emailInput.focus();
     return { email: "", password: "" };
   }
 
   if (password.length < 6) {
-    setSaveStatus("密碼至少需要 6 個字元。");
+    setAuthFeedback("密碼至少需要 6 個字元。", "error");
     passwordInput.focus();
     return { email: "", password: "" };
   }
@@ -356,7 +362,24 @@ function resetResult() {
 
 function setSaveStatus(message) {
   saveStatus.textContent = message;
-  if (authMessage) authMessage.textContent = message;
+  if (authMessage) {
+    authMessage.textContent = message;
+    authMessage.classList.remove("success", "error");
+  }
+}
+
+function setAuthFeedback(message, type) {
+  saveStatus.textContent = message;
+  if (!authMessage) return;
+  authMessage.textContent = message;
+  authMessage.classList.remove("success", "error");
+  if (type) authMessage.classList.add(type);
+}
+
+function clearAuthInputs() {
+  emailInput.value = "";
+  passwordInput.value = "";
+  confirmPasswordInput.value = "";
 }
 
 function withTimeout(promise, timeoutMs) {
