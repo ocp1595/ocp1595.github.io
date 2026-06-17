@@ -1,6 +1,6 @@
 # GitHub Pages + Firebase 線上練習測驗
 
-這是一個部署在 GitHub Pages 的靜態練習測驗網站，使用 Firebase Auth 登入，並使用 Firestore 儲存題目與作答紀錄。
+這是一個部署在 GitHub Pages 的靜態練習測驗網站，使用 Firebase Auth Email/Password 登入，並使用 Firestore 儲存題目與作答紀錄。
 
 ## 檔案
 
@@ -16,7 +16,17 @@
 
 1. 到 Firebase Console。
 2. 開啟 `Build > Authentication`。
-3. 啟用 `Google` 登入。
+3. 啟用 `Email/Password` 登入。
+4. 只需要開啟第一個 `Email/Password`，不用開啟 Email link。
+5. 按 Save。
+
+### Authorized domains
+
+Email/Password 登入通常不需要額外 OAuth redirect 設定，但仍建議在 Authorized domains 確認有：
+
+```text
+ocp1595.github.io
+```
 4. 在 Authorized domains 確認有：
 
 ```text

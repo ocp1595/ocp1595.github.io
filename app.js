@@ -1,11 +1,12 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import {
-  GoogleAuthProvider,
+  browserLocalPersistence,
+  createUserWithEmailAndPassword,
   getAuth,
-  getRedirectResult,
   onAuthStateChanged,
-  signInWithPopup,
-  signInWithRedirect,
+  sendPasswordResetEmail,
+  setPersistence,
+  signInWithEmailAndPassword,
   signOut,
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import {
@@ -57,8 +58,6 @@ const fallbackQuiz = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-const provider = new GoogleAuthProvider();
-provider.setCustomParameters({ prompt: "select_account" });
 
 const state = {
   user: null,
@@ -69,6 +68,12 @@ const state = {
 
 const authButton = document.querySelector("#authButton");
 const authStatus = document.querySelector("#authStatus");
+const authCard = document.querySelector("#authCard");
+const emailInput = document.querySelector("#emailInput");
+const passwordInput = document.querySelector("#passwordInput");
+const loginEmailButton = document.querySelector("#loginEmailButton");
+const registerEmailButton = document.querySelector("#registerEmailButton");
+const resetPasswordButton = document.querySelector("#resetPasswordButton");
 const quizSelect = document.querySelector("#quizSelect");
 const loadQuizButton = document.querySelector("#loadQuizButton");
 const quizTitle = document.querySelector("#quizTitle");
@@ -81,25 +86,29 @@ const saveStatus = document.querySelector("#saveStatus");
 const recordsList = document.querySelector("#recordsList");
 
 authButton.addEventListener("click", async () => {
-  try {
-    if (state.user) {
-      await signOut(auth);
-      return;
-    }
-
-    if (shouldUseRedirectSignIn()) {
-      await signInWithRedirect(auth, provider);
-      return;
-    }
-
-    await signInWithPopup(auth, provider);
-  } catch (error) {
-    setSaveStatus(getAuthErrorMessage(error));
+  if (state.user) {
+    await signOut(auth);
+    return;
   }
+  authCard.scrollIntoView({ behavior: "smooth", block: "center" });
+  emailInput.focus();
 });
 
-getRedirectResult(auth).catch((error) => {
-  setSaveStatus(getAuthErrorMessage(error));
+authCard.addEventListener("submit", (event) => {
+  event.preventDefault();
+  signInWithEmail();
+});
+
+loginEmailButton.addEventListener("click", () => {
+  signInWithEmail();
+});
+
+registerEmailButton.addEventListener("click", () => {
+  registerWithEmail();
+});
+
+resetPasswordButton.addEventListener("click", () => {
+  resetPassword();
 });
 
 loadQuizButton.addEventListener("click", () => {
@@ -113,13 +122,73 @@ submitQuizButton.addEventListener("click", () => {
 
 onAuthStateChanged(auth, (user) => {
   state.user = user;
-  authButton.textContent = user ? "登出" : "Google 登入";
-  authStatus.textContent = user ? `已登入：${user.displayName || user.email}` : "尚未登入";
+  authButton.textContent = user ? "登出" : "帳號登入";
+  authStatus.textContent = user ? `已登入：${user.email}` : "尚未登入";
   setSaveStatus(user ? "送出後會儲存作答紀錄" : "登入後可儲存作答紀錄");
   loadRecords();
 });
 
 loadQuiz(state.quizId);
+
+async function signInWithEmail() {
+  const { email, password } = getEmailCredentials();
+  if (!email || !password) return;
+
+  try {
+    await setPersistence(auth, browserLocalPersistence);
+    await signInWithEmailAndPassword(auth, email, password);
+    setSaveStatus("登入成功。");
+  } catch (error) {
+    setSaveStatus(getEmailAuthErrorMessage(error));
+  }
+}
+
+async function registerWithEmail() {
+  const { email, password } = getEmailCredentials();
+  if (!email || !password) return;
+
+  try {
+    await setPersistence(auth, browserLocalPersistence);
+    await createUserWithEmailAndPassword(auth, email, password);
+    setSaveStatus("註冊成功，已登入。");
+  } catch (error) {
+    setSaveStatus(getEmailAuthErrorMessage(error));
+  }
+}
+
+async function resetPassword() {
+  const email = emailInput.value.trim();
+  if (!email) {
+    setSaveStatus("請先輸入 Email，再寄送重設密碼信。");
+    return;
+  }
+
+  try {
+    await sendPasswordResetEmail(auth, email);
+    setSaveStatus("重設密碼信已寄出，請檢查信箱。");
+  } catch (error) {
+    setSaveStatus(getEmailAuthErrorMessage(error));
+  }
+}
+
+function getEmailCredentials() {
+  const email = emailInput.value.trim();
+  const password = passwordInput.value;
+
+  if (!email) {
+    setSaveStatus("請輸入 Email。");
+    emailInput.focus();
+    return { email: "", password: "" };
+  }
+
+  if (password.length < 6) {
+    setSaveStatus("密碼至少需要 6 個字元。");
+    passwordInput.focus();
+    return { email: "", password: "" };
+  }
+
+  return { email, password };
+}
 
 async function loadQuiz(quizId) {
   resetResult();
@@ -215,7 +284,6 @@ async function submitQuiz() {
   try {
     await addDoc(collection(db, "attempts"), {
       uid: state.user.uid,
-      displayName: state.user.displayName || "",
       email: state.user.email || "",
       quizId: state.quizId,
       score,
@@ -290,16 +358,14 @@ function withTimeout(promise, timeoutMs) {
   ]);
 }
 
-function shouldUseRedirectSignIn() {
-  return window.matchMedia("(max-width: 760px), (pointer: coarse)").matches;
-}
-
-function getAuthErrorMessage(error) {
-  const message = error?.message || String(error);
-  if (message.includes("disallowed_useragent")) {
-    return "Google 不允許在 LINE、Facebook、Gmail 等內嵌瀏覽器登入。請用 Chrome、Edge 或 Safari 直接開啟 https://ocp1595.github.io/ 再登入。";
-  }
-  return `登入失敗：${message}`;
+function getEmailAuthErrorMessage(error) {
+  const code = error?.code || "";
+  if (code === "auth/email-already-in-use") return "這個 Email 已註冊，請直接登入。";
+  if (code === "auth/invalid-email") return "Email 格式不正確。";
+  if (code === "auth/invalid-credential") return "Email 或密碼錯誤。";
+  if (code === "auth/operation-not-allowed") return "Firebase 尚未啟用 Email/Password 登入，請到 Authentication > Sign-in method 啟用。";
+  if (code === "auth/weak-password") return "密碼強度不足，至少需要 6 個字元。";
+  return `帳號操作失敗：${error?.message || String(error)}`;
 }
 
 function escapeHtml(value) {

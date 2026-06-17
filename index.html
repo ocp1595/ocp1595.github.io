@@ -19,7 +19,7 @@
       <nav class="nav" aria-label="主要導覽">
         <a href="#quiz">測驗</a>
         <a href="#records">紀錄</a>
-        <button class="nav-button" id="authButton" type="button">Google 登入</button>
+        <button class="nav-button" id="authButton" type="button">帳號登入</button>
       </nav>
     </header>
 
@@ -29,7 +29,7 @@
           <p class="status-pill" id="authStatus">尚未登入</p>
           <h1>高中國文線上練習測驗</h1>
           <p>
-            使用 Firebase Google 登入與 Firestore 題庫，完成測驗後會即時計分，
+            使用 Firebase Email/Password 登入與 Firestore 題庫，完成測驗後會即時計分，
             並將作答紀錄儲存到雲端，方便日後追蹤練習成果。
           </p>
           <div class="hero-actions">
@@ -44,6 +44,25 @@
 
       <section class="app-shell" id="quiz">
         <aside class="quiz-panel">
+          <form class="auth-card" id="authCard">
+            <h2>帳號登入</h2>
+            <label class="field-label" for="emailInput">Email</label>
+            <input class="text-control" id="emailInput" type="email" autocomplete="email" placeholder="you@example.com" />
+            <label class="field-label" for="passwordInput">密碼</label>
+            <input
+              class="text-control"
+              id="passwordInput"
+              type="password"
+              autocomplete="current-password"
+              placeholder="至少 6 個字元"
+            />
+            <div class="auth-actions">
+              <button class="button button-primary" id="loginEmailButton" type="button">登入</button>
+              <button class="button button-secondary" id="registerEmailButton" type="button">註冊</button>
+            </div>
+            <button class="link-button" id="resetPasswordButton" type="button">寄送重設密碼信</button>
+          </form>
+
           <h2>測驗設定</h2>
           <label class="field-label" for="quizSelect">選擇測驗</label>
           <select id="quizSelect" class="select-control">

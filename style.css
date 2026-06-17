@@ -30,6 +30,7 @@ body {
 }
 
 button,
+input,
 select {
   font: inherit;
 }
@@ -232,6 +233,12 @@ a {
   padding: 24px;
 }
 
+.auth-card {
+  margin-bottom: 28px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--line);
+}
+
 .quiz-panel h2,
 .quiz-workspace h2 {
   font-size: 28px;
@@ -245,7 +252,8 @@ a {
   font-weight: 800;
 }
 
-.select-control {
+.select-control,
+.text-control {
   width: 100%;
   min-height: 44px;
   padding: 0 12px;
@@ -254,6 +262,32 @@ a {
   background: #fff;
   color: var(--ink);
   font-weight: 700;
+}
+
+.text-control::placeholder {
+  color: #8a97a6;
+}
+
+.auth-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.auth-actions .button {
+  margin-top: 0;
+  width: 100%;
+}
+
+.link-button {
+  margin-top: 12px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--teal-dark);
+  cursor: pointer;
+  font-weight: 800;
 }
 
 .quiz-panel .button {
@@ -479,6 +513,10 @@ a {
   .button,
   .result-bar .button {
     width: 100%;
+  }
+
+  .auth-actions {
+    grid-template-columns: 1fr;
   }
 
   .workspace-header,
