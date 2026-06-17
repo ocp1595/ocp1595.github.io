@@ -69,6 +69,7 @@ const state = {
 const authButton = document.querySelector("#authButton");
 const authStatus = document.querySelector("#authStatus");
 const authCard = document.querySelector("#authCard");
+const authMessage = document.querySelector("#authMessage");
 const emailInput = document.querySelector("#emailInput");
 const passwordInput = document.querySelector("#passwordInput");
 const loginEmailButton = document.querySelector("#loginEmailButton");
@@ -347,6 +348,7 @@ function resetResult() {
 
 function setSaveStatus(message) {
   saveStatus.textContent = message;
+  if (authMessage) authMessage.textContent = message;
 }
 
 function withTimeout(promise, timeoutMs) {
