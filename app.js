@@ -72,6 +72,7 @@ const authCard = document.querySelector("#authCard");
 const authMessage = document.querySelector("#authMessage");
 const emailInput = document.querySelector("#emailInput");
 const passwordInput = document.querySelector("#passwordInput");
+const confirmPasswordInput = document.querySelector("#confirmPasswordInput");
 const loginEmailButton = document.querySelector("#loginEmailButton");
 const registerEmailButton = document.querySelector("#registerEmailButton");
 const resetPasswordButton = document.querySelector("#resetPasswordButton");
@@ -147,6 +148,13 @@ async function signInWithEmail() {
 async function registerWithEmail() {
   const { email, password } = getEmailCredentials();
   if (!email || !password) return;
+
+  const confirmPassword = confirmPasswordInput.value;
+  if (password !== confirmPassword) {
+    setSaveStatus("兩次輸入的密碼不一致，請重新確認。");
+    confirmPasswordInput.focus();
+    return;
+  }
 
   try {
     await setPersistence(auth, browserLocalPersistence);
